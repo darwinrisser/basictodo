@@ -1,50 +1,45 @@
 import React, { Component } from 'react';
+import User from './User';
 import './App.css';
-import Todo from './Todo.js';
 
 class App extends Component {
   state = {
-    todos: [
-      {
-        id: 1,
-        text: "take out the trash",
-        isComplete: false
-      },
-      {
-        id: 2,
-        text: "feed the dog",
-        isComplete: false
-      },
-      {
-        id: 3,
-        text: "cook dinner",
-        isComplete: false
-      }
-    ]
+    results: []
   }
 
-  markComplete = (id) => {
-    this.setState({todos: this.state.todos.map(todo => {
-      if(todo.id === id){
-        todo.isComplete = !todo.isComplete;
-      }
-      return todo;
+  componentDidMount(){
+    fetch('https://randomuser.me/api?results=25')
+    .then((res) =>{
+      return res.json();
     })
-  })
+    .then((json)=>{
+     json.results.forEach(user=>user.isHidden = true)
+     this.setState({results: json.results})
+    })
+  }
+
+  hide = (index) => {
+    let copyOfResults = [...this.state.results];
+    let clickedUser = copyOfResults[index];
+    let tf = clickedUser.isHidden;
+    clickedUser.isHidden = !tf;
+    this.setState({results: copyOfResults})
   }
 
   render(){
     return (
       <div className="App">
-        {this.state.todos.map((todo, index)=>(
-           <Todo
-           text={todo.text}
-           index={index}
-           id={todo.id}
-           isComplete={todo.isComplete}
-           markComplete={this.markComplete}
-           />
-         ))}
+        {this.state.results.map((user, index)=> (
+          <User
+          image={user.picture.thumbnail}
+          name={user.name.first}
+          index={index}
+          key={index}
+          hide={this.hide}
+          hidden={user.isHidden}
+          />
+        )
+      )}
       </div>
     );
   }  
